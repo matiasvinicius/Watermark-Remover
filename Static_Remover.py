@@ -76,7 +76,7 @@ class Remover:
         return (col1, row1), (col2, row2)
 
     # callback called everytime the user tune the trackbar on the UI, it is doing nothing
-    def callback(val):
+    def callback(val, val2):
         pass
 
     '''
