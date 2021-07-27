@@ -23,6 +23,7 @@ class Remover:
 
         # Apply a median blur using a kernel of 23x23 in the whole image and store in a new variable
         blurred_img = cv.medianBlur(self.img, 23) # blurred image
+        # blurred_img = self.fourier_low_pass(gray_scaled, 10) # fourier tentative
 
         # Get the water mark coordinates
         point1, point2 = self.get_selection_coordinates()
@@ -88,11 +89,23 @@ class Remover:
         fourier = np.fft.fft2(img) # fourier transform
         centered = np.fft.fftshift(fourier) # shift the high frequencies to the middle
 
-        # Gaussian mask for keeping only low frequencies (blur borders)
-        mask = self.gaussian_mask(img, radius)
+        # magnitude_spectrum = 20 * np.log(np.abs(centered))
+        # spectrum_img = np.abs(magnitude_spectrum).clip(0, 255).astype(np.uint8)
+        # cv.imshow('Magnitude Spectrum', spectrum_img)
 
-        # Apply the mask on the magnitude
-        filtered = centered * mask
+        # Gaussian mask for keeping only low frequencies (blur borders)
+        mask = self.gaussian_mask(img.shape, radius)
+
+        filtered = centered * mask # apply the mask on the magnitude
+
+        # filtered_spectrum = 20 * np.log(np.abs(filtered))
+        # rows, cols = filtered_spectrum.shape
+        # for x in range(cols):
+        #     for y in range(rows):
+        #         filtered_spectrum[y, x] = round(filtered_spectrum[y, x]) if filtered_spectrum[y, x] > 0 else 0
+        # filtered_img = np.abs(filtered_spectrum).clip(0, 255).astype(np.uint8)
+        # cv.imshow('Spectrum with mask applied', filtered_img)
+
         shifted_back = np.fft.ifftshift(filtered) # shift back to the original frequency positions
         inv_fourier = np.fft.ifft2(shifted_back) # Inverse Fourier transform
         img_back = np.abs(inv_fourier).clip(0, 255).astype(np.uint8)  # convert to a opencv readable format
