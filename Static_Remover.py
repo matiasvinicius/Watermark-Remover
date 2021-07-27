@@ -12,6 +12,7 @@ References used:
 
 class Remover:
     def __init__(self, path):
+        self.path = path
         self.img = cv.imread(path)
 
     '''
@@ -51,17 +52,20 @@ class Remover:
 
             # Water mark removal by substituting the water mark area by the median blurred image pixel by pixel on
             # the selected area
-            img_cp = self.img.copy()
+            result = self.img.copy()
             for row in range(point1[1],point2[1]):
                 for col in range(point1[0],point2[0]):
                     if canny_water_mark[row][col] > 150: # watermark area where canny detected edges
-                        img_cp[row][col] = blurred_img[row][col]
+                        result[row][col] = blurred_img[row][col]
 
             # Update the image on the UI
-            cv.imshow('Result', img_cp)
+            cv.imshow('Result', result)
 
-            # Stop processing when the letter 'q' is pressed and then close the UI
-            if cv.waitKey(1) &0xFF == ord('q'):
+            # Stop processing when any key is pressed and then save the image and close the UI
+            if cv.waitKey(60) != -1:
+                format_index = self.path.find('.')
+                new_path = self.path[:format_index] + '_no_wm' + self.path[format_index:]
+                cv.imwrite(new_path, result)
                 break
 
     # Use ROI from OpenCV for the user to selected an area in the image and return its coordinates
